@@ -2,7 +2,10 @@ require 'minitest_helper'
 
 describe ActiveRecord::PgReconnect do
 
-  let(:connection) { ActiveRecord::Base.connection }
+  let(:connection) do
+    ActiveRecord::Base.establish_connection 'postgres://postgres:password@localhost:5432/postgres'
+    ActiveRecord::Base.connection
+  end
 
   it 'Reconnect after fail' do
     refute connection.reconnection_required?
