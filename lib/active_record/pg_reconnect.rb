@@ -4,14 +4,13 @@ require 'active_record'
 require 'active_record/connection_adapters/postgresql_adapter'
 
 class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
-
-  RECONNECTABLE_METHODS = [
-    :execute,
-    :exec_query,
-    :exec_insert,
-    :exec_update,
-    :exec_delete,
-    :query
+  RECONNECTABLE_METHODS = %i[
+    execute
+    exec_query
+    exec_insert
+    exec_update
+    exec_delete
+    query
   ].freeze
 
   RECONNECTABLE_METHODS.each do |method|
@@ -21,16 +20,16 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 
     private unsafe_method
 
-    define_method method do |*args, &block|
+    define_method method do |*args, **kwargs, &block|
       begin
         if reconnection_required?
           @reconnection_required = false
           reconnect!
         end
-        send(unsafe_method, *args, &block)
-      rescue ActiveRecord::StatementInvalid => ex
-        @reconnection_required = ex.cause.is_a? PG::ConnectionBad
-        raise ex
+        send(unsafe_method, *args, **kwargs, &block)
+      rescue ActiveRecord::StatementInvalid => e
+        @reconnection_required = e.cause.is_a? PG::ConnectionBad
+        raise e
       end
     end
   end
@@ -38,5 +37,4 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   def reconnection_required?
     @reconnection_required ||= false
   end
-
 end
