@@ -21,13 +21,13 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 
     private unsafe_method
 
-    define_method method do |*args, &block|
+    define_method method do |*args, **kwargs, &block|
       begin
         if reconnection_required?
           @reconnection_required = false
           reconnect!
         end
-        send(unsafe_method, *args, &block)
+        send(unsafe_method, *args, **kwargs, &block)
       rescue ActiveRecord::StatementInvalid, ActiveRecord::ConnectionNotEstablished => ex
         @reconnection_required = ex.cause.is_a? PG::ConnectionBad
         raise ex
