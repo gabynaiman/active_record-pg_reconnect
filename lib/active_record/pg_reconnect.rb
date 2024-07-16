@@ -28,7 +28,7 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
           reconnect!
         end
         send(unsafe_method, *args, &block)
-      rescue ActiveRecord::StatementInvalid => ex
+      rescue ActiveRecord::StatementInvalid, ActiveRecord::ConnectionNotEstablished => ex
         @reconnection_required = ex.cause.is_a? PG::ConnectionBad
         raise ex
       end
